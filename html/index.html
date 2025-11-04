@@ -32,11 +32,11 @@
 
 		<div class="half">
 			<div>
-				<label>First Name</label>
+				<label>First Name*</label>
 				<input name="fname" x-onerror="First name not specified">
 			</div>
 			<div>
-				<label>Last Name</label>
+				<label>Last Name*</label>
 				<input name="lname" >
 			</div>
 		</div>
@@ -125,12 +125,32 @@
 			</div>
 		</div>
 
-	<!--
+		<div>
+			<div style="width:100%;display:flex;align-items:top;justify-content:space-between;">
+				<label>Contact Preferences</label>
+				<div style="font-weight: bold;">&darr;</div>
+			</div>
+			<select name="preferences" style="display: block" multiple>
+				<option value="email">Email</option>
+				<option value="text">Text</option>
+				<option value="phone">Phone</option>
+			</select>
+		</div>
+		<!--
+		<div class="half">
+			<div style="display: flex; gap: 8%;">
+				<p>I'd like to add comments</p>
+				<input type="checkbox">
+			</div>	
+			<div></div>	
+		</div>	
+
 		<div>
 			<label>Comments</label>
 			<textarea name="comments"></textarea>
 		</div>	
-	-->
+		-->
+
 		<div>	
 			<input type="submit" value="Submit" style="width:50%; min-width: 100px; max-width: 200px;">
 		</div>	

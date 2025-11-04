@@ -15,6 +15,7 @@
  */
 document.addEventListener( "alpine:init", () => {
 
+	// Define all selectors for this job.
   const selectors = 'input:not([type=submit]), select, textarea'
 
   // Use this to shuttle stuff around...
@@ -58,26 +59,38 @@ console.log( errstr )
 
 			// Check for a minimum length
 			if ( f.hasAttribute( "x-minlength" ) ) {
-
+				// TODO: Depending on handling style, we'll throw from here if necessary
 			}
 
 			// Check for a maximum length
 			if ( f.hasAttribute( "x-maxlength" ) ) {
-
+				// TODO: Depending on handling style, we'll throw from here if necessary
 			}
 
 			// Check for a validator function
 			if ( f.hasAttribute( "x-validator" ) ) {
-
+				// TODO: Depending on handling style, we'll throw from here if necessary
 			}
+
 
       // Handle checkboxes
       if ( f.type == "checkbox" ) {
         p[ f.name ] = ( f.checked ) ? true : false
         continue
       }
+
       // Handle select multiples
-      //else if ( f.type == "select-multiple" ) { ; }
+      else if ( f.type == "select-multiple" ) { 
+				console.log(f)
+				console.log( `Value = ${f.value}` )
+				p[ f.name ] = []
+				for ( const ff of f.selectedOptions ) {
+					p[ f.name ].push( ff.value )	
+				}
+				continue
+			}
+
+			// Everything else...
       else {
         p[ f.name ] = c
       }
