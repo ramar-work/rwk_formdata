@@ -15,6 +15,13 @@ section, summary, time, mark, audio, video {
 	vertical-align: baseline;
 }
 
+input, textarea, select {
+display: block;
+padding: 0;
+margin: 0;
+box-sizing: border-box;
+}
+
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure, 
 footer, header, hgroup, menu, nav, section {
@@ -23,6 +30,7 @@ footer, header, hgroup, menu, nav, section {
 
 body {
 	line-height: 1;
+position: relative;
 }
 
 ol, ul {
@@ -57,30 +65,44 @@ form {
 	background: white;
 	border-radius: 5px;
 	padding: 20px;
+	position: relative;
 }
 
 form h1 {
-	font-weight; bold;
+	font-weight; bolder;
 	font-size: 2em;
+	margin-bottom: 20px;
 }
 
 form > div {
 	margin-bottom: 10px;
 }
 
-form > div > input {
-	width: 94%;
+form > div.half {
+display: flex;
+flex-direction: row;
+align-items: center;
+gap: 4%;
+}
+
+form > div.half > div {
+	width: 48%;
+}
+
+div > input {
+	width: 100%;
 }
 
 form > div > textarea {
-	width: 94%;
+	width: 90%;
 }
 
 form label {
-	margin-bottom: 5px;
+	margin-bottom: 10px;
 }
 
 form input, form textarea, form select {
+	position: relative;
 	padding: 10px;
 }
 

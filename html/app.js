@@ -8,5 +8,10 @@
 
 document.addEventListener( "alpine:init", () => {
 
+	Alpine.data( "app", () => ({
+		show() {
+			//console.log( $formdata );
+		}
+	}))
 
 })

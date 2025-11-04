@@ -4,7 +4,13 @@
  * Collects form handling logic all in one place.  In any apps, this
  * can be rebuilt with `form`.
  *
- * ?
+ * TODO
+ * ----
+ * - Add a term for auto submittal (if values pass validation)
+ * - x-sendas to control how to send the payload back to server
+ * - x-sendmethod to control how to send the payload back to server
+ * - Add basic error handling (can't tell if this should be seprate or not)
+ * - x-error or x-onerror can be used to create custom messages.
  *
  */
 document.addEventListener( "alpine:init", () => {
@@ -14,22 +20,34 @@ document.addEventListener( "alpine:init", () => {
   // Use this to shuttle stuff around...
   Alpine.store( 'formdata', { data: {} } )
 
-
   // Use the magic to access the validated values 
   Alpine.magic( 'formdata', (el) => {
-    // Validate and require checks
+
+		// Define ahead of time for cleanliness
     const p = {}
     const formdata = el.querySelectorAll( selectors )
+
+    // Validate and require checks
     //for ( const f of Alpine.store( 'formdata' ).data ) {
     for ( const f of formdata ) {
 
       // Trim the value
       const c = f.value.trim()
 
+			// Store any error text somewhere
+			let errstr = "No custom error message specified"
+			let minlength = 0
+			let maxlength = 0
+
       // If this is disabled, skip it
       if ( f.hasAttribute( "disabled" ) ) {
         continue
       }
+
+			if ( f.hasAttribute( "x-onerror" ) ) {
+				errstr = f.getAttribute( "x-onerror" ) 
+			}
+console.log( errstr )
 
       // Check that the field is required
       if ( f.hasAttribute( "required" ) && !c.match( /[A-Z,a-z,0-9]/g ) ) {
@@ -38,8 +56,20 @@ document.addEventListener( "alpine:init", () => {
         return
       }
 
-      // If the 'x-formdata-validator' attribute exists, run whatever is asked for (a regex is most likely)
-      // { ... }
+			// Check for a minimum length
+			if ( f.hasAttribute( "x-minlength" ) ) {
+
+			}
+
+			// Check for a maximum length
+			if ( f.hasAttribute( "x-maxlength" ) ) {
+
+			}
+
+			// Check for a validator function
+			if ( f.hasAttribute( "x-validator" ) ) {
+
+			}
 
       // Handle checkboxes
       if ( f.type == "checkbox" ) {
@@ -67,6 +97,7 @@ document.addEventListener( "alpine:init", () => {
   //Alpine.directive( 'formdata', ( el, { expression }, { evaluate } )
     const selectors = 'input:not([type=submit]), select, textarea'
     const formdata = el.querySelectorAll( selectors )
+		//console.log( formdata )
     //Alpine.store( 'formdata' ).data = formdata
   })
 
