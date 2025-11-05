@@ -93,10 +93,6 @@ div > input {
 	width: 100%;
 }
 
-form > div > textarea {
-	width: 90%;
-}
-
 form label {
 	margin-bottom: 10px;
 }
@@ -108,6 +104,11 @@ form select {
 form input, form textarea, form select {
 	position: relative;
 	padding: 10px;
+	width: 100%;
+}
+
+form textarea {
+	height: 150px;
 }
 
 label,input {
@@ -117,4 +118,39 @@ label,input {
 body {
 	background-image: url("../assets/z1.avif");
 	background-size: 120%;
+}
+
+
+.toggle, .toggled {
+	font-weight: bold;	
+/*content: &darr;*/
+	width: 20px;
+	height: 20px;
+	background: #eee;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+}
+
+.toggled {
+	transform: rotate(180deg);/* translate(0,10px);*/
+}
+
+.showhide {
+	width:100%;
+	display:flex;
+	align-items:top;
+	justify-content:space-between;
+}
+
+@media screen and (max-width: 666px) {
+
+	form {
+		box-sizing: border-box;
+		max-width: 600px;
+		min-width: 250px;
+		width: 80%;
+		margin: 10%;
+	}
+
 }

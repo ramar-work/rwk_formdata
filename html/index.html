@@ -45,6 +45,7 @@
 			<label>Phone Number*</label>
 			<input name="number">
 		</div>
+
 		<div>
 			<label>Email Address*</label>
 			<input name="email" >
@@ -126,30 +127,26 @@
 		</div>
 
 		<div>
-			<div style="width:100%;display:flex;align-items:top;justify-content:space-between;">
+			<div class="showhide">
 				<label>Contact Preferences</label>
-				<div style="font-weight: bold;">&darr;</div>
+				<div @click="showPreferences = !showPreferences"
+					:class="showPreferences ? 'toggled' : 'toggle'">&darr;</div>
 			</div>
-			<select name="preferences" style="display: block" multiple>
+			<select x-transition x-show="showPreferences" name="preferences" style="display: block" multiple>
 				<option value="email">Email</option>
 				<option value="text">Text</option>
 				<option value="phone">Phone</option>
 			</select>
 		</div>
-		<!--
-		<div class="half">
-			<div style="display: flex; gap: 8%;">
-				<p>I'd like to add comments</p>
-				<input type="checkbox">
-			</div>	
-			<div></div>	
-		</div>	
 
 		<div>
-			<label>Comments</label>
-			<textarea name="comments"></textarea>
-		</div>	
-		-->
+			<div class="showhide">
+				<label>I'd like to add comments</label>
+				<div @click="showComments = !showComments"
+					:class="showComments ? 'toggled' : 'toggle'">&darr;</div>
+			</div>
+			<textarea x-transition x-show="showComments" name="comments"></textarea>
+		</div>
 
 		<div>	
 			<input type="submit" value="Submit" style="width:50%; min-width: 100px; max-width: 200px;">
