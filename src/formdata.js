@@ -26,56 +26,86 @@ document.addEventListener( "alpine:init", () => {
 
 	// Generate a random string
 	const random = function () {
-		// Math.floor( Math.random() ) // 1
-		return "myrandclass"
+		const alpha = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		const arr = []
+		for ( let i = 0; i < 8; i++ ) {
+			arr.push( alpha[ Math.floor( ( Math.random() * 1000 ) % 26 ) ] )
+		}  
+		return arr.join("")
 	}
 
 	// Define all selectors for this job.
   const selectors = 'input:not([type=submit]), select, textarea'
-
-	// Add a style node here
-	const dom = document.createElement( "style" );
+	const userclass = "" || `_${random()}`
 	const head = ( [].slice.call( document.getElementsByTagName( "head" ) ) || [])[0]
+	const staytime = 3.0
+	const animtime = 0.5
+	// const prompt = ???
+	// const position = [ top, left, right, bottom, custom: ... ]
+
+	// Since these are user settings, we need to check for failures before we even get started...
+	if ( false ) {
+		// Check that all times are positive	
+	}
+
+	// Add to the DOM before we even start
+	const style = `
+		@keyframes setborder { 
+			from { border: 1px solid #444; } 
+			to { border: 5px solid red; } 
+		}
+
+		@keyframes noborder { 
+			from { border: 5px solid red; } 
+			to { border: 1px solid #444; } 
+		}
+
+		@keyframes shaker {
+			0% { transform: translate(3px,0px); }
+			10% { transform: translate(0px,3px); }
+			20% { transform: translate(2px,0px); }
+			30% { transform: translate(0px,2px); }
+			40% { transform: translate(1px,0px); }
+			50% { transform: translate(0px,1px); }
+			100% { transform: translate(0px,0px); }
+		}
+
+		input.${userclass}, textarea.${userclass}, select.${userclass} { 
+			position: relative; 
+			animation-name: setborder, shaker, noborder;
+			animation-delay: 0s, 0s, 2s;
+			animation-duration: ${animtime}s, 0.2s, ${animtime / 2}s;
+			animation-iteration-count: 1, 1, 1;
+			animation-fill-mode: forwards, none, forwards;
+			/*border: 1px solid red;*/
+		}
+
+		.${userclass} { 
+			position: relative; 
+		}
+	`
 
 	// Add to the head
 	if ( head ) {
+		const dom = document.createElement( "style" );
+		dom.innerHTML = style;
 		head.appendChild( dom )
 	}
 
-	// Error decorator 
-	// TODO: I should be private
+	// Error decorator, TODO: I should be private
 	styleError = function ( el, errstr ) {
-console.log( 'CALLBACK START' )
 
-		// Define defaults here
-		const userclass = ""
-		const time = 0.5
-
-		// Add a STYLE node (this MIGHT need to happen sooner)
-		dom.innerHTML = `
-			@keyframes setborder { from { border: inherit; } to { border: 1px solid red; } }
-			.${random()} { animation: ${time}s ease-in 0s setborder; border: 1px solid red; }
-		`
-
-		// Save the original styles somewhere?
+		// TODO: The requested label or class would be applied here.
 		if ( true ) {
+			// Add style to thing
+			el.classList.add( userclass )
 
-			// TODO: The requested label or class would be applied here.
-			if ( true ) {
-				el.classList.add( userclass || random() )
-console.log( 'CALLBACK END - DEFAULT' )
-				return
-			}
-
-			// TODO: Set default timeout
-
-			// Apply the style
-			//el.style = styles
-
+			// Add a div as well (with a matching color or class)
+			const div = document.createElement( "div" )
+			div.classList.add( userclass )
+			return
 		}
-		
-		//throw new Error( "Error occurred, stop" )
-console.log( 'CALLBACK END' )
+
 		return
 	}
 
@@ -174,12 +204,10 @@ console.log( 'CALLBACK END' )
 
   // Register the directive (and any callbacks, eventually)
   Alpine.directive( 'formdata', ( el ) => {
-
 		// x-debug (in the correct "scope") should allow me to show logs or not
 		true ? console.log( 'initializing formdata' ) : ""
-
-  //Alpine.directive( 'formdata', ( el, { expression }, { evaluateLater, effect } )
-  //Alpine.directive( 'formdata', ( el, { expression }, { evaluate } )
+		//Alpine.directive( 'formdata', ( el, { expression }, { evaluateLater, effect } )
+		//Alpine.directive( 'formdata', ( el, { expression }, { evaluate } )
     const selectors = 'input:not([type=submit]), select, textarea'
     const formdata = el.querySelectorAll( selectors )
 		//console.log( formdata )
