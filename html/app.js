@@ -14,8 +14,10 @@ document.addEventListener( "alpine:init", () => {
 
 		showComments: false,
 
-		show() {
-			//console.log( $formdata );
+		submit( f ) {
+			if ( f ) {
+				alert( JSON.stringify( f ) );
+			}
 		}
 
 	}))

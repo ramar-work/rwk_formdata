@@ -1,8 +1,17 @@
 /**
- * hg-formdata.js
+ * formdata.js
+ * ===========
  * 
  * Collects form handling logic all in one place.  In any apps, this
  * can be rebuilt with `form`.
+ *
+ *
+ * Usage
+ * -----
+ * - ?
+ * - ?
+ * - ?
+ *
  *
  * TODO
  * ----
@@ -15,8 +24,60 @@
  */
 document.addEventListener( "alpine:init", () => {
 
+	// Generate a random string
+	const random = function () {
+		// Math.floor( Math.random() ) // 1
+		return "myrandclass"
+	}
+
 	// Define all selectors for this job.
   const selectors = 'input:not([type=submit]), select, textarea'
+
+	// Add a style node here
+	const dom = document.createElement( "style" );
+	const head = ( [].slice.call( document.getElementsByTagName( "head" ) ) || [])[0]
+
+	// Add to the head
+	if ( head ) {
+		head.appendChild( dom )
+	}
+
+	// Error decorator 
+	// TODO: I should be private
+	styleError = function ( el, errstr ) {
+console.log( 'CALLBACK START' )
+
+		// Define defaults here
+		const userclass = ""
+		const time = 0.5
+
+		// Add a STYLE node (this MIGHT need to happen sooner)
+		dom.innerHTML = `
+			@keyframes setborder { from { border: inherit; } to { border: 1px solid red; } }
+			.${random()} { animation: ${time}s ease-in 0s setborder; border: 1px solid red; }
+		`
+
+		// Save the original styles somewhere?
+		if ( true ) {
+
+			// TODO: The requested label or class would be applied here.
+			if ( true ) {
+				el.classList.add( userclass || random() )
+console.log( 'CALLBACK END - DEFAULT' )
+				return
+			}
+
+			// TODO: Set default timeout
+
+			// Apply the style
+			//el.style = styles
+
+		}
+		
+		//throw new Error( "Error occurred, stop" )
+console.log( 'CALLBACK END' )
+		return
+	}
 
   // Use this to shuttle stuff around...
   Alpine.store( 'formdata', { data: {} } )
@@ -45,18 +106,27 @@ document.addEventListener( "alpine:init", () => {
         continue
       }
 
+			// Replace an error message if requested
 			if ( f.hasAttribute( "x-onerror" ) ) {
 				errstr = f.getAttribute( "x-onerror" ) 
 			}
-console.log( errstr )
 
+			/*
       // Check that the field is required
-      if ( f.hasAttribute( "required" ) && !c.match( /[A-Z,a-z,0-9]/g ) ) {
+      if ( f.hasAttribute( "x-required" ) && !c.match( /[A-Z,a-z,0-9]/g ) ) {
         // TODO: Be way more specific about what's failing here
-        throw new Error( `Field ${f.name} was required, but not specified` )
-        return
+        //throw new Error( `Field ${f.name} was required, but not specified` )
+        //const omsg = `Field ${f.name} was required, but not specified`
+				styleError( f, errstr || `Field ${f.name} was required, but not specified` )
+        return {}
       }
+			*/
 
+			if ( true ) {
+				styleError( f, errstr || `Field ${f.name} was required, but not specified` )
+				return null 
+			}
+		
 			// Check for a minimum length
 			if ( f.hasAttribute( "x-minlength" ) ) {
 				// TODO: Depending on handling style, we'll throw from here if necessary
@@ -71,7 +141,6 @@ console.log( errstr )
 			if ( f.hasAttribute( "x-validator" ) ) {
 				// TODO: Depending on handling style, we'll throw from here if necessary
 			}
-
 
       // Handle checkboxes
       if ( f.type == "checkbox" ) {
@@ -105,7 +174,10 @@ console.log( errstr )
 
   // Register the directive (and any callbacks, eventually)
   Alpine.directive( 'formdata', ( el ) => {
-		console.log( 'initializing formdata' )
+
+		// x-debug (in the correct "scope") should allow me to show logs or not
+		true ? console.log( 'initializing formdata' ) : ""
+
   //Alpine.directive( 'formdata', ( el, { expression }, { evaluateLater, effect } )
   //Alpine.directive( 'formdata', ( el, { expression }, { evaluate } )
     const selectors = 'input:not([type=submit]), select, textarea'

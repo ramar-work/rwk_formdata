@@ -11,8 +11,13 @@
 
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;800&display=swap" rel="stylesheet">
-
+	<link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+	<!--
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+	-->
+	<!--
+	<link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@200..700&display=swap" rel="stylesheet">
+	-->
 	<title>Formdata Test</title>
 
 	<link rel="stylesheet" href="app.css">
@@ -27,7 +32,7 @@
 <div x-data="app" class="back">
 
 	<!-- This should have all been built in... but it's not... -->
-	<form x-formdata @submit.prevent="console.log( $formdata )">
+	<form x-formdata @submit.prevent="submit( $formdata )"> <!--"console.log( $formdata )">-->
 		<h1>Contact Us</h1>
 
 		<div class="half">
@@ -51,6 +56,7 @@
 			<input name="email" >
 		</div>
 
+<!--
 		<div class="half">
 			<div>
 				<label>City</label>
@@ -147,6 +153,7 @@
 			</div>
 			<textarea x-transition x-show="showComments" name="comments"></textarea>
 		</div>
+-->
 
 		<div>	
 			<input type="submit" value="Submit" style="width:50%; min-width: 100px; max-width: 200px;">
