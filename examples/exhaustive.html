@@ -20,11 +20,32 @@
 	-->
 	<title>Formdata Test</title>
 
-	<link rel="stylesheet" href="app.css">
+	<link rel="stylesheet" href="examples.css">
 	<script defer src="../vendor/alpine.min.js"></script>
 	<script src="../src/formdata.js"></script>
-	<script src="app.js"></script>
 </head>
+
+
+<script>
+document.addEventListener( "alpine:init", () => {
+
+	Alpine.data( "app", () => ({
+
+		showPreferences: false,
+
+		showComments: false,
+
+		submit( f ) {
+			//console.log('submitting')
+			if ( f ) {
+				alert( JSON.stringify( f ) );
+			}
+		}
+
+	}))
+
+})
+</script>
 
 
 <body>
@@ -48,12 +69,12 @@
 
 		<div>
 			<label>Phone Number*</label>
-			<input name="number">
+			<input name="number" x-minlength=3 x-validator="abc$" x-onerror="Fails check">
 		</div>
 
 		<div>
 			<label>Email Address*</label>
-			<input name="email" >
+			<input name="email" x-minlength=3 x-validator="email" x-onvalidatorerror="This doens't look like a valid email address">
 		</div>
 
 <!--

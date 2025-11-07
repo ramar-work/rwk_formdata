@@ -203,12 +203,24 @@ document.addEventListener( "alpine:init", () => {
 
 			// Check for a validator function
 			if ( f.hasAttribute( "x-validator" ) ) {
-				// TODO: Depending on handling style, we'll throw from here if necessary
+				// Pull the validator
+				const validator = f.getAttribute( "x-validator" )
+				console.log( validator ) 
+				const regexp = new RegExp( validator )
+					console.log( regexp.exec( c ) )
+				if ( !regexp.exec( c ) ) {
+					styleError( f, `Argument type to [x-minlength] at field ${f.name} is invalid` )
+					return null 
+				}
+				
 			}
 
       // If the 'x-formdata-transformer' attribute exists, run that on the value
 			// This can control custom stuff like email addresses and phone formatters
-      // { ... }
+      /*
+			if ( f.hasAttribute( "x-transformer" ) ) {
+			}
+			*/
       
       // Finally, serialize each type for transmission via JSON 
 			// TODO: (supporting other formats would still help)

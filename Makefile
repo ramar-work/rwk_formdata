@@ -3,3 +3,7 @@
 # Could PROBABLY use the cpp to get the job done
 minify:
 
+
+# Convert from markdown into HTML for quick testing
+docstest:
+	markdown README.md > readme.html
