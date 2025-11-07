@@ -177,12 +177,28 @@ document.addEventListener( "alpine:init", () => {
 
 			// Check for a minimum length
 			if ( f.hasAttribute( "x-minlength" ) ) {
-				// TODO: Depending on handling style, we'll throw from here if necessary
+				const len = parseInt( f.getAttribute( "x-minlength" ) )
+				if ( isNaN( len ) ) {
+					styleError( f, `Argument type to [x-minlength] at field ${f.name} is invalid` )
+					return null 
+				}
+				if ( c.length < len ) {
+					styleError( f, errstr || `Length of field ${f.name} must be at least ${len} characters` )
+					return null 
+				}
 			}
 
 			// Check for a maximum length
 			if ( f.hasAttribute( "x-maxlength" ) ) {
-				// TODO: Depending on handling style, we'll throw from here if necessary
+				const len = parseInt( f.getAttribute( "x-maxlength" ) )
+				if ( isNaN( len ) ) {
+					styleError( f, `Argument type to [x-minlength] at field ${f.name} is invalid` )
+					return null 
+				}
+				if ( c.length > len ) {
+					styleError( f, errstr || `Length of field ${f.name} must be less than ${len} characters` )
+					return null 
+				}
 			}
 
 			// Check for a validator function
