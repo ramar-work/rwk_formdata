@@ -207,9 +207,9 @@ document.addEventListener( "alpine:init", () => {
 				const validator = f.getAttribute( "x-validator" )
 				console.log( validator ) 
 				const regexp = new RegExp( validator )
-					console.log( regexp.exec( c ) )
+				//console.log( regexp.exec( c ) )
 				if ( !regexp.exec( c ) ) {
-					styleError( f, `Argument type to [x-minlength] at field ${f.name} is invalid` )
+					styleError( f, errstr || `Field ${f.name} fails validation` )
 					return null 
 				}
 				
