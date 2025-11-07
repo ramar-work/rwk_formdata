@@ -38,7 +38,7 @@ document.addEventListener( "alpine:init", () => {
   const selectors = 'input:not([type=submit]), select, textarea'
 	const userclass = "" || `_${random()}`
 	const head = ( [].slice.call( document.getElementsByTagName( "head" ) ) || [])[0]
-	const staytime = 3.0
+	const staytime = 3.25
 	const animtime = 0.5
 	// const prompt = ???
 	// const position = [ top, left, right, bottom, custom: ... ]
@@ -47,8 +47,7 @@ document.addEventListener( "alpine:init", () => {
 	if ( false ) {
 		// Check that all times are positive	
 	}
-
-	// Add to the DOM before we even start
+// Add to the DOM before we even start
 	const style = `
 		@keyframes setborder { 
 			from { border: 1px solid #444; } 
@@ -58,6 +57,16 @@ document.addEventListener( "alpine:init", () => {
 		@keyframes noborder { 
 			from { border: 5px solid red; } 
 			to { border: 1px solid #444; } 
+		}
+
+		@keyframes setbg { 
+			from { background: transparent; color: transparent; } 
+			to { background: red; color: white; }
+		}
+
+		@keyframes nobg { 
+			from { background: red; color: white; } 
+			to { background: transparent; color: transparent; }
 		}
 
 		@keyframes shaker {
@@ -74,14 +83,19 @@ document.addEventListener( "alpine:init", () => {
 			position: relative; 
 			animation-name: setborder, shaker, noborder;
 			animation-delay: 0s, 0s, 2s;
-			animation-duration: ${animtime}s, 0.2s, ${animtime / 2}s;
+			animation-duration: ${animtime}s, 0.25s, ${animtime}s;
 			animation-iteration-count: 1, 1, 1;
 			animation-fill-mode: forwards, none, forwards;
-			/*border: 1px solid red;*/
 		}
 
-		.${userclass} { 
-			position: relative; 
+		div.${userclass} {
+			position: absolute; 
+			padding: 5px;
+			animation-name: setbg, shaker, nobg;
+			animation-delay: 0s, 0s, 2s;
+			animation-duration: ${animtime}s, 0.25s, ${animtime}s;
+			animation-iteration-count: 1, 1, 1;
+			animation-fill-mode: forwards, none, forwards;
 		}
 	`
 
@@ -95,22 +109,37 @@ document.addEventListener( "alpine:init", () => {
 	// Error decorator, TODO: I should be private
 	styleError = function ( el, errstr ) {
 
-		// TODO: The requested label or class would be applied here.
-		if ( true ) {
-			// Add style to thing
-			el.classList.add( userclass )
+		// Define a block
+		let div = null
 
-			// Add a div as well (with a matching color or class)
-			const div = document.createElement( "div" )
+		// Add style to thing
+		el.classList.add( userclass )
+
+		// Add a div for TEXT as well (with a matching color or class)
+		if ( errstr ) {
+			div = document.createElement( "div" )
 			div.classList.add( userclass )
-			return
+			div.innerHTML = errstr
+			el.insertAdjacentElement( "afterend", div )
 		}
+	
+		// Remove the class after time elapses
+		setTimeout( () => {
+			//console.log( `removing ${userclass}` )
+			el.classList.remove( userclass )
+			if ( div ) {
+				div.classList.remove( userclass )
+				el.parentElement.removeChild( div )
+			}
+		}, staytime * 1000 )
 
 		return
 	}
 
+
   // Use this to shuttle stuff around...
   Alpine.store( 'formdata', { data: {} } )
+
 
   // Use the magic to access the validated values 
   Alpine.magic( 'formdata', (el) => {
@@ -123,11 +152,9 @@ document.addEventListener( "alpine:init", () => {
     //for ( const f of Alpine.store( 'formdata' ).data ) {
     for ( const f of formdata ) {
 
-      // Trim the value
+      // Define things
       const c = f.value.trim()
-
-			// Store any error text somewhere
-			let errstr = "No custom error message specified"
+			let errstr = ""
 			let minlength = 0
 			let maxlength = 0
 
@@ -141,22 +168,13 @@ document.addEventListener( "alpine:init", () => {
 				errstr = f.getAttribute( "x-onerror" ) 
 			}
 
-			/*
       // Check that the field is required
       if ( f.hasAttribute( "x-required" ) && !c.match( /[A-Z,a-z,0-9]/g ) ) {
         // TODO: Be way more specific about what's failing here
-        //throw new Error( `Field ${f.name} was required, but not specified` )
-        //const omsg = `Field ${f.name} was required, but not specified`
 				styleError( f, errstr || `Field ${f.name} was required, but not specified` )
-        return {}
+        return null 
       }
-			*/
 
-			if ( true ) {
-				styleError( f, errstr || `Field ${f.name} was required, but not specified` )
-				return null 
-			}
-		
 			// Check for a minimum length
 			if ( f.hasAttribute( "x-minlength" ) ) {
 				// TODO: Depending on handling style, we'll throw from here if necessary
@@ -172,7 +190,12 @@ document.addEventListener( "alpine:init", () => {
 				// TODO: Depending on handling style, we'll throw from here if necessary
 			}
 
-      // Handle checkboxes
+      // If the 'x-formdata-transformer' attribute exists, run that on the value
+			// This can control custom stuff like email addresses and phone formatters
+      // { ... }
+      
+      // Finally, serialize each type for transmission via JSON 
+			// TODO: (supporting other formats would still help)
       if ( f.type == "checkbox" ) {
         p[ f.name ] = ( f.checked ) ? true : false
         continue
@@ -180,12 +203,9 @@ document.addEventListener( "alpine:init", () => {
 
       // Handle select multiples
       else if ( f.type == "select-multiple" ) { 
-				console.log(f)
-				console.log( `Value = ${f.value}` )
+				//console.log(f), console.log( `Value = ${f.value}` )
 				p[ f.name ] = []
-				for ( const ff of f.selectedOptions ) {
-					p[ f.name ].push( ff.value )	
-				}
+				for ( const ff of f.selectedOptions ) p[ f.name ].push( ff.value )	
 				continue
 			}
 
@@ -194,9 +214,6 @@ document.addEventListener( "alpine:init", () => {
         p[ f.name ] = c
       }
 
-      // If the 'x-formdata-transformer' attribute exists, run that on the value
-      // { ... }
-      
     }
     return p
   })

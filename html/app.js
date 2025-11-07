@@ -15,6 +15,7 @@ document.addEventListener( "alpine:init", () => {
 		showComments: false,
 
 		submit( f ) {
+			//console.log('submitting')
 			if ( f ) {
 				alert( JSON.stringify( f ) );
 			}
