@@ -19,14 +19,17 @@
 <script>
 document.addEventListener( "alpine:init", () => {
 
+	// This should trigger before anything occurs
 	Alpine.data( "app", () => ({
 
+		// Toggle preferences views
 		showPreferences: false,
 
+		// Toggle comments textarea
 		showComments: false,
 
+		// Handle a submit through a custom callback
 		submit( f ) {
-			//console.log('submitting')
 			if ( f ) {
 				alert( JSON.stringify( f ) );
 			}

@@ -22,7 +22,20 @@
  * - x-error or x-onerror can be used to create custom messages.
  *
  */
-document.addEventListener( "alpine:init", () => {
+document.addEventListener( "alpine:init", (xx) => {
+
+	// Define a list of selectors that won't change
+	const selectors = 'input:not([type=submit]), select, textarea'
+	
+	// Define a config object and reference won't change 
+	const config = {
+		staytime: 3.25,
+		animtime: 0.5,
+		popupstyle: "bottom",
+		catchall: false,
+		// TODO: Try to change this to encapsulate
+		classname: "",  //`_${random()}`
+	}
 
 	// Generate a random string
 	const random = function () {
@@ -34,91 +47,19 @@ document.addEventListener( "alpine:init", () => {
 		return arr.join("")
 	}
 
-	// Define all selectors for this job.
-  const selectors = 'input:not([type=submit]), select, textarea'
-	const userclass = "" || `_${random()}`
-	const head = ( [].slice.call( document.getElementsByTagName( "head" ) ) || [])[0]
-	const staytime = 3.25
-	const animtime = 0.5
-	// const prompt = ???
-	// const position = [ top, left, right, bottom, custom: ... ]
-
-	// Since these are user settings, we need to check for failures before we even get started...
-	if ( false ) {
-		// Check that all times are positive	
-	}
-// Add to the DOM before we even start
-	const style = `
-		@keyframes setborder { 
-			from { border: 1px solid #444; } 
-			to { border: 5px solid red; } 
-		}
-
-		@keyframes noborder { 
-			from { border: 5px solid red; } 
-			to { border: 1px solid #444; } 
-		}
-
-		@keyframes setbg { 
-			from { background: transparent; color: transparent; } 
-			to { background: red; color: white; }
-		}
-
-		@keyframes nobg { 
-			from { background: red; color: white; } 
-			to { background: transparent; color: transparent; }
-		}
-
-		@keyframes shaker {
-			0% { transform: translate(3px,0px); }
-			10% { transform: translate(0px,3px); }
-			20% { transform: translate(2px,0px); }
-			30% { transform: translate(0px,2px); }
-			40% { transform: translate(1px,0px); }
-			50% { transform: translate(0px,1px); }
-			100% { transform: translate(0px,0px); }
-		}
-
-		input.${userclass}, textarea.${userclass}, select.${userclass} { 
-			position: relative; 
-			animation-name: setborder, shaker, noborder;
-			animation-delay: 0s, 0s, 2s;
-			animation-duration: ${animtime}s, 0.25s, ${animtime}s;
-			animation-iteration-count: 1, 1, 1;
-			animation-fill-mode: forwards, none, forwards;
-		}
-
-		div.${userclass} {
-			position: absolute; 
-			padding: 5px;
-			animation-name: setbg, shaker, nobg;
-			animation-delay: 0s, 0s, 2s;
-			animation-duration: ${animtime}s, 0.25s, ${animtime}s;
-			animation-iteration-count: 1, 1, 1;
-			animation-fill-mode: forwards, none, forwards;
-		}
-	`
-
-	// Add to the head
-	if ( head ) {
-		const dom = document.createElement( "style" );
-		dom.innerHTML = style;
-		head.appendChild( dom )
-	}
-
 	// Error decorator, TODO: I should be private
-	styleError = function ( el, errstr ) {
+	const styleError = function ( el, errstr ) {
 
 		// Define a block
 		let div = null
 
 		// Add style to thing
-		el.classList.add( userclass )
+		el.classList.add( config.classname )
 
 		// Add a div for TEXT as well (with a matching color or class)
 		if ( errstr ) {
 			div = document.createElement( "div" )
-			div.classList.add( userclass )
+			div.classList.add( config.classname )
 			div.innerHTML = errstr
 			el.insertAdjacentElement( "afterend", div )
 		}
@@ -126,20 +67,18 @@ document.addEventListener( "alpine:init", () => {
 		// Remove the class after time elapses
 		setTimeout( () => {
 			//console.log( `removing ${userclass}` )
-			el.classList.remove( userclass )
+			el.classList.remove( config.classname )
 			if ( div ) {
-				div.classList.remove( userclass )
+				div.classList.remove( config.classname )
 				el.parentElement.removeChild( div )
 			}
-		}, staytime * 1000 )
+		}, config.staytime * 1000 )
 
 		return
 	}
 
-
   // Use this to shuttle stuff around...
   Alpine.store( 'formdata', { data: {} } )
-
 
   // Use the magic to access the validated values 
   Alpine.magic( 'formdata', (el) => {
@@ -249,14 +188,135 @@ document.addEventListener( "alpine:init", () => {
 
   // Register the directive (and any callbacks, eventually)
   Alpine.directive( 'formdata', ( el ) => {
+
 		// x-debug (in the correct "scope") should allow me to show logs or not
 		true ? console.log( 'initializing formdata' ) : ""
 		//Alpine.directive( 'formdata', ( el, { expression }, { evaluateLater, effect } )
 		//Alpine.directive( 'formdata', ( el, { expression }, { evaluate } )
-    const selectors = 'input:not([type=submit]), select, textarea'
-    const formdata = el.querySelectorAll( selectors )
+
+		// Check if the user wants to diplay a "popup" or not
+		if ( false ) {
+			if ( el.hasAttribute( "x-position" ) ) {
+
+				// If so, check the position where they want it
+				const positions = [ "top", "left", "right", "bottom", "centered" ] //custom: ... ]
+
+				// Get it
+				config.popupstyle = el.getAttribute( "x-position" )
+
+				// If it doesn't match, throw or just go with the default
+				if ( !config.popupstyle || positions.getIndex( config.popupstyle ) ) {
+					alert( `
+						Argument type to [x-position] must be one of the following: 
+						${[ "top", "left", "right", "bottom", "centered" ].join( "\n" )} 
+					` )
+					return
+				}
+
+			}
+		}
+
+		// Check if the user wants to immediately throw an exception or evaluate ALL the fields
+		if ( el.hasAttribute( "x-all" ) ) {
+			config.catchall = true
+		}
+
+		// Get any custom class names
+		if ( el.hasAttribute( "x-onerrorclass" ) ) {
+			const regex = /[0-9]/
+			config.classname = el.getAttribute( "x-onerrorclass" ) 
+			// Perhaps make sure that the class name is valid? and not blank?
+			if ( !config.classname ) { //|| config.classname 
+				alert( `Argument type to [x-animtime] must be numeric and positive` )
+				return
+			}	
+		}
+		else {
+			// Generate a random one
+			config.classname = `_${random()}`
+
+			// Check that all animation time is positive
+			if ( el.hasAttribute( "x-animtime" ) ) {
+				if ( isNaN( config.animtime = el.getAttribute( "x-animtime" ) ) ) {
+					alert( `Argument type to [x-animtime] must be numeric and positive` )
+					return
+				}
+			}
+
+			// Check that "stay" time is positive
+			if ( el.hasAttribute( "x-staytime" ) ) {
+				if ( isNaN( config.staytime = el.getAttribute( "x-staytime" ) ) ) {
+					alert( `Argument type to [x-animtime] must be numeric and positive` )
+					return
+				}	
+			}
+
+			// Add to the DOM before we even start
+			const style = `
+				@keyframes setborder { 
+					from { border: 1px solid #444; } 
+					to { border: 5px solid red; } 
+				}
+
+				@keyframes noborder { 
+					from { border: 5px solid red; } 
+					to { border: 1px solid #444; } 
+				}
+
+				@keyframes setbg { 
+					from { background: transparent; color: transparent; } 
+					to { background: red; color: white; }
+				}
+
+				@keyframes nobg { 
+					from { background: red; color: white; } 
+					to { background: transparent; color: transparent; }
+				}
+
+				@keyframes shaker {
+					0% { transform: translate(3px,0px); }
+					10% { transform: translate(0px,3px); }
+					20% { transform: translate(2px,0px); }
+					30% { transform: translate(0px,2px); }
+					40% { transform: translate(1px,0px); }
+					50% { transform: translate(0px,1px); }
+					100% { transform: translate(0px,0px); }
+				}
+
+				input.${config.classname}, 
+				textarea.${config.classname}, 
+				select.${config.classname} { 
+					position: relative; 
+					animation-name: setborder, shaker, noborder;
+					animation-delay: 0s, 0s, 2s;
+					animation-duration: ${config.animtime}s, 0.25s, ${config.animtime}s;
+					animation-iteration-count: 1, 1, 1;
+					animation-fill-mode: forwards, none, forwards;
+				}
+
+				div.${config.classname} {
+					position: absolute; 
+					padding: 5px;
+					animation-name: setbg, shaker, nobg;
+					animation-delay: 0s, 0s, 2s;
+					animation-duration: ${config.animtime}s, 0.25s, ${config.animtime}s;
+					animation-iteration-count: 1, 1, 1;
+					animation-fill-mode: forwards, none, forwards;
+				}
+			`
+
+			// Add to the head first, or if not present, the end of the document
+			const xel = ( [].slice.call( document.getElementsByTagName( "head" ) ) || [])[0] || document.body
+			if ( xel ) {
+				const dom = document.createElement( "style" );
+				dom.innerHTML = style;
+				xel.appendChild( dom )
+			}
+		}
+
 		//console.log( formdata )
     //Alpine.store( 'formdata' ).data = formdata
+		//console.log( `X-ALL = ${config.catchall}` )
   })
 
 })
