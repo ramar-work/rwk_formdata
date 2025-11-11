@@ -40,36 +40,53 @@ document.addEventListener( "alpine:init", () => {
 })
 </script>
 
+
+<!--
+<style>
+.pinky {
+	background: blue;
+	color: white;
+}
+
+input.pinky {
+	border: 5px solid pink !important;
+	background: blue;
+}
+</style>
+-->
+
+
 <body>
 
 <div x-data="app" class="back">
 
-	<!-- This should have all been built in... but it's not... -->
-	<form x-formdata @submit.prevent="submit( $formdata )">
+	<form x-formdata.animate.debug.decorate
+		x-formdata-onerrorclass="pinky"
+		@submit.prevent="submit( $formdata )">
+
 		<h1>Contact Us</h1>
 
 		<div class="half">
 			<div>
 				<label>First Name*</label>
-				<input name="fname" x-onerror="Please specify your first name" x-required>
+				<input name="fname" x-formdata-onerror="Please specify your first name" required>
 			</div>
 			<div>
 				<label>Last Name*</label>
-				<input name="lname" x-onerror="Please specify your last name." x-required>
+				<input name="lname" x-formdata-onerror="Please specify your last name." required>
 			</div>
 		</div>
 
 		<div>
 			<label>Phone Number*</label>
-			<input name="number" x-minlength=3 x-validator="^abc$">
+			<input name="number" minlength=3 x-validator="^abc$">
 		</div>
 
 		<div>
 			<label>Email Address*</label>
-			<input name="email" x-minlength=3 x-validator="email" x-onvalidatorerror="This doens't look like a valid email address">
+			<input name="email" minlength=4 x-validator="email" x-onvalidatorerror="This doesn't look like a valid email address">
 		</div>
 
-<!--
 		<div class="half">
 			<div>
 				<label>City</label>
@@ -166,7 +183,6 @@ document.addEventListener( "alpine:init", () => {
 			</div>
 			<textarea x-transition x-show="showComments" name="comments"></textarea>
 		</div>
--->
 
 		<div>	
 			<input type="submit" value="Submit" style="width:50%; min-width: 100px; max-width: 200px;">

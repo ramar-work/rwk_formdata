@@ -29,10 +29,22 @@ document.addEventListener( "alpine:init", (xx) => {
 	
 	// Define a config object and reference won't change 
 	const config = {
+
+		// 
 		staytime: 3.25,
+
+		// 
 		animtime: 0.5,
-		popupstyle: "bottom",
-		catchall: false,
+
+		//
+		decoration: false,
+
+		//
+		exhaustive: false,
+
+		//
+		realtime: false,
+
 		// TODO: Try to change this to encapsulate
 		classname: "",  //`_${random()}`
 	}
@@ -54,19 +66,20 @@ document.addEventListener( "alpine:init", (xx) => {
 
 	// Error decorator, TODO: I should be private
 	const styleError = function ( el, errstr ) {
-
 		// Define a block
 		let div = null
 
 		// Add style to thing
 		el.classList.add( config.classname )
 
-		// Add a div for TEXT as well (with a matching color or class)
-		if ( errstr ) {
-			div = document.createElement( "div" )
-			div.classList.add( config.classname )
-			div.innerHTML = errstr
-			el.insertAdjacentElement( "afterend", div )
+		if ( config.decoration ) {
+			// Add a div for TEXT as well (with a matching color or class)
+			if ( errstr ) {
+				div = document.createElement( "div" )
+				div.classList.add( config.classname )
+				div.innerHTML = errstr
+				el.insertAdjacentElement( "afterend", div )
+			}
 		}
 	
 		// Remove the class after time elapses
@@ -82,6 +95,98 @@ document.addEventListener( "alpine:init", (xx) => {
 		return
 	}
 
+	// Define a local validator function for each field
+	const validate = function (p,f) {
+
+		// Define things
+		const c = f.value.trim()
+		let errstr = ""
+		let minlength = 0
+		let maxlength = 0
+
+		// If the field is disabled, skip it
+		if ( f.hasAttribute( "disabled" ) ) {
+			return true	
+		}
+
+		// Replace an error message if requested
+		if ( f.hasAttribute( "x-formdata-onerror" ) ) {
+			errstr = f.getAttribute( "x-formdata-onerror" ) 
+		}
+
+		// Check that the field is required
+		if ( f.hasAttribute( "required" ) && !c.match( /[A-Z,a-z,0-9]/g ) ) {
+			// TODO: Be way more specific about what's failing here
+			styleError( f, errstr || `Field ${f.name} was required, but not specified` )
+			return false 
+		}
+
+		// Check for a minimum length
+		if ( f.hasAttribute( "minlength" ) ) {
+			const len = parseInt( f.getAttribute( "minlength" ) )
+			if ( isNaN( len ) ) {
+				styleError( f, `Argument type to [minlength] at field ${f.name} is invalid` )
+				return null 
+			}
+			if ( c.length < len ) {
+				styleError( f, errstr || `Length of field ${f.name} must be at least ${len} characters` )
+				return false
+			}
+		}
+
+		// Check for a maximum length
+		if ( f.hasAttribute( "maxlength" ) ) {
+			const len = parseInt( f.getAttribute( "maxlength" ) )
+			if ( isNaN( len ) ) {
+				styleError( f, `Argument type to [maxlength] at field ${f.name} is invalid` )
+				return false 
+			}
+			if ( c.length > len ) {
+				styleError( f, errstr || `Length of field ${f.name} must be less than ${len} characters` )
+				return false 
+			}
+		}
+
+		// Check for a validator function
+		if ( f.hasAttribute( "x-formdata-validator" ) ) {
+			// Pull the validator
+			const validator = f.getAttribute( "x-formdata-validator" )
+			const regexp = new RegExp( validator )
+			//console.log( regexp.exec( c ) )
+			if ( !regexp.exec( c ) ) {
+				styleError( f, errstr || `Field ${f.name} fails validation` )
+				return false 
+			}
+		}
+
+		// If the 'x-formdata-transformer' attribute exists, run that on the value
+		// This can control custom stuff like email addresses and phone formatters
+		if ( f.hasAttribute( "x-formdata-transformer" ) ) {
+			die( "Attribute x-formdata-transformer is not fully implemented yet." )
+			return false 
+		}
+		
+		// Finally, serialize each type for transmission via JSON 
+		// TODO: (supporting other formats would still help)
+		if ( f.type == "checkbox" ) {
+			p[ f.name ] = ( f.checked ) ? true : false
+		}
+
+		// Handle select multiples
+		else if ( f.type == "select-multiple" ) { 
+			//console.log(f), console.log( `Value = ${f.value}` )
+			p[ f.name ] = []
+			for ( const ff of f.selectedOptions ) p[ f.name ].push( ff.value )	
+		}
+
+		// Everything else...
+		else {
+			p[ f.name ] = c
+		}
+
+		return true
+	}	
+
   // Use this to shuttle stuff around...
   Alpine.store( 'formdata', { data: {} } )
 
@@ -91,142 +196,72 @@ document.addEventListener( "alpine:init", (xx) => {
 		// Define ahead of time for cleanliness
     const p = {}
     const formdata = el.querySelectorAll( selectors )
+		let pstatus = true;
 
     // Validate and require checks
-    //for ( const f of Alpine.store( 'formdata' ).data ) {
     for ( const f of formdata ) {
-
-      // Define things
-      const c = f.value.trim()
-			let errstr = ""
-			let minlength = 0
-			let maxlength = 0
-
-      // If this is disabled, skip it
-      if ( f.hasAttribute( "disabled" ) ) {
-        continue
-      }
-
-			// Replace an error message if requested
-			if ( f.hasAttribute( "x-onerror" ) ) {
-				errstr = f.getAttribute( "x-onerror" ) 
+		
+			// If exhaustive, then all checks must run
+			if ( !validate( p, f ) ) {
+				pstatus = false 
 			}
 
-      // Check that the field is required
-      if ( f.hasAttribute( "x-required" ) && !c.match( /[A-Z,a-z,0-9]/g ) ) {
-        // TODO: Be way more specific about what's failing here
-				styleError( f, errstr || `Field ${f.name} was required, but not specified` )
-        return null 
-      }
-
-			// Check for a minimum length
-			if ( f.hasAttribute( "x-minlength" ) ) {
-				const len = parseInt( f.getAttribute( "x-minlength" ) )
-				if ( isNaN( len ) ) {
-					styleError( f, `Argument type to [x-minlength] at field ${f.name} is invalid` )
-					return null 
-				}
-				if ( c.length < len ) {
-					styleError( f, errstr || `Length of field ${f.name} must be at least ${len} characters` )
-					return null 
-				}
+			if ( !pstatus && !config.exhaustive ) {
+				return null
 			}
-
-			// Check for a maximum length
-			if ( f.hasAttribute( "x-maxlength" ) ) {
-				const len = parseInt( f.getAttribute( "x-maxlength" ) )
-				if ( isNaN( len ) ) {
-					styleError( f, `Argument type to [x-minlength] at field ${f.name} is invalid` )
-					return null 
-				}
-				if ( c.length > len ) {
-					styleError( f, errstr || `Length of field ${f.name} must be less than ${len} characters` )
-					return null 
-				}
-			}
-
-			// Check for a validator function
-			if ( f.hasAttribute( "x-validator" ) ) {
-				// Pull the validator
-				const validator = f.getAttribute( "x-validator" )
-				console.log( validator ) 
-				const regexp = new RegExp( validator )
-				//console.log( regexp.exec( c ) )
-				if ( !regexp.exec( c ) ) {
-					styleError( f, errstr || `Field ${f.name} fails validation` )
-					return null 
-				}
-				
-			}
-
-      // If the 'x-formdata-transformer' attribute exists, run that on the value
-			// This can control custom stuff like email addresses and phone formatters
-      /*
-			if ( f.hasAttribute( "x-transformer" ) ) {
-			}
-			*/
-      
-      // Finally, serialize each type for transmission via JSON 
-			// TODO: (supporting other formats would still help)
-      if ( f.type == "checkbox" ) {
-        p[ f.name ] = ( f.checked ) ? true : false
-        continue
-      }
-
-      // Handle select multiples
-      else if ( f.type == "select-multiple" ) { 
-				//console.log(f), console.log( `Value = ${f.value}` )
-				p[ f.name ] = []
-				for ( const ff of f.selectedOptions ) p[ f.name ].push( ff.value )	
-				continue
-			}
-
-			// Everything else...
-      else {
-        p[ f.name ] = c
-      }
 
     }
-    return p
+
+		// This should get here everytime now
+    return pstatus ? p : null
   })
 
 
   // Register the directive (and any callbacks, eventually)
   Alpine.directive( 'formdata', ( el, { modifiers, expression } ) => {
 
-		// x-debug (in the correct "scope") should allow me to show logs or not
-		true ? console.log( 'initializing formdata' ) : ""
-		//Alpine.directive( 'formdata', ( el, { expression }, { evaluateLater, effect } )
-		//Alpine.directive( 'formdata', ( el, { expression }, { evaluate } )
+		const module = "x-formdata"
+		const key = {
+			for: {
+				errorclass: `${module}-onerrorclass`,
+				decoration: `${module}-decoration`,
+				animtime: `${module}-animtime`,
+				staytime: `${module}-staytime`,
+				animtime: `${module}-animtime`,
+			}
+		}
 
-/*
-console.log( modifiers );
-console.log( expression );
+		// Add the novalidate attribute so that 'required', 'minlength', 
+		// 'maxlength', 'min' and 'max' can be used with no excess decorators
+		el.setAttribute( "novalidate", "" )
 
-console.log( modifiers.includes( "exhaustive" ) )
-return
-*/
+		// .debug (in the correct "scope") should allow me to show logs or not
+		modifiers.includes( "debug" ) ? console.log( `Initializing ${module}...` ) : ""
 
 		// Check if the user wants to immediately throw an exception or evaluate ALL the fields
-		if ( el.hasAttribute( "x-exhaustive" ) ) {
-			config.catchall = true
+		if ( modifiers.includes( "exhaustive" ) ) {
+			config.exhaustive = true
 		}
 
 		// Check if the user wants to diplay a "popup" or not
-		if ( false ) {
-			if ( el.hasAttribute( "x-position" ) ) {
+		if ( modifiers.includes( "decorate" ) ) {
+		
+			if ( !el.hasAttribute( key.for.decoration ) ) {
+				config.decoration = "bottom"
+			}
+			else {
 
 				// If so, check the position where they want it
 				const positions = [ "top", "left", "right", "bottom", "centered" ] //custom: ... ]
 
 				// Get it
-				config.popupstyle = el.getAttribute( "x-position" )
+				config.decoration = el.getAttribute( key.for.decoration )
 
 				// If it doesn't match, throw or just go with the default
-				if ( !config.popupstyle || positions.getIndex( config.popupstyle ) ) {
+				if ( !config.decoration || !positions.includes( config.decoration ) ) {
 					die( `
-						Argument type to [x-position] must be one of the following: 
-						${[ "top", "left", "right", "bottom", "centered" ].join( "\n" )} 
+						Argument type to [${key.for.decoration}] must be one of the following: 
+						${[ "top", "left", "right", "bottom", "centered" ].join( ", " )} 
 					`)
 				}
 
@@ -234,40 +269,40 @@ return
 		}
 
 		// Get any custom class names
-		if ( !el.hasAttribute( "x-onerrorclass" ) ) {
+		if ( !el.hasAttribute( key.for.errorclass ) ) {
 			config.classname = `_${random()}`
 		}
 		else {
-			config.classname = el.getAttribute( "x-onerrorclass" ) 
+			config.classname = el.getAttribute( key.for.errorclass )
 
 			// Make sure that the class name is valid? and not blank?
 			if ( !config.classname ) {
-				die( `Argument type to [x-onerrorclass] must be a string` )
+				die( `Argument type to [${key.for.errorclass}] must be a string` )
 			}
 
 			// Make sure that the class name is valid (e.g. starts with anything but a number)	
 			if ( /[0-9]/.exec( config.classname ) ) {
-				die( `Argument type to [x-onerrorclass] must be a string and start with an English letter` )
+				die( `Argument type to [${key.for.errorclass}] must be a string and start with an English letter` )
 			}
 
 		}
 	
 		// If animate is true, add rules
-		if ( el.hasAttribute( "x-animate" ) || el.hasAttribute( "x-animtime" ) ) {
+		if ( modifiers.includes( "animate" ) || el.hasAttribute( key.for.animtime ) ) {
 			// Find the head (or root) node
 			const xel = ( [].slice.call( document.getElementsByTagName( "head" ) ) || [])[0] || document.body
 
 			// Check that all animation time is positive
-			if ( el.hasAttribute( "x-animtime" ) ) {
-				if ( isNaN( config.animtime = el.getAttribute( "x-animtime" ) ) ) {
-					die( `Argument type to [x-animtime] must be numeric and positive` )
+			if ( el.hasAttribute( key.for.animtime ) ) {
+				if ( isNaN( config.animtime = el.getAttribute( key.for.animtime ) ) ) {
+					die( `Argument type to [${key.for.animtime}] must be numeric and positive` )
 				}
 			}
 
 			// Check that "stay" time is positive
-			if ( el.hasAttribute( "x-staytime" ) ) {
-				if ( isNaN( config.staytime = el.getAttribute( "x-staytime" ) ) ) {
-					die( `Argument type to [x-animtime] must be numeric and positive` )
+			if ( el.hasAttribute( key.for.staytime ) ) {
+				if ( isNaN( config.staytime = el.getAttribute( key.for.staytime ) ) ) {
+					die( `Argument type to [${key.for.staytime}] must be numeric and positive` )
 				}	
 			}
 
@@ -331,11 +366,11 @@ return
 		}
 
 		// Dump the configuration if requested
-		if ( true ) {
-    //Alpine.store( 'formdata' ).data = formdata
+		if ( modifiers.includes( "debug" ) ) {
+			//Alpine.store( 'formdata' ).data = formdata
 			console.log( "============= CONFIGURATION =================" ) 
-			console.log( `x-all = ${config.catchall}` )
-			console.log( `x-position = ${config.popupstyle}` )
+			console.log( `x-exhaustive = ${config.exhaustive}` )
+			console.log( `x-decoration = ${config.decoration}` )
 			console.log( `x-onerrorclass = ${config.classname}` )
 			console.log( `x-animtime = ${config.animtime}` )
 			console.log( `x-staytime = ${config.staytime}` )
