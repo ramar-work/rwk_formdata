@@ -37,6 +37,11 @@ document.addEventListener( "alpine:init", (xx) => {
 		classname: "",  //`_${random()}`
 	}
 
+	// Use this until we figure out the best way to display errors
+	const die = function (errmsg) {
+		throw new Error( errmsg )
+	} 
+
 	// Generate a random string
 	const random = function () {
 		const alpha = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -187,12 +192,25 @@ document.addEventListener( "alpine:init", (xx) => {
 
 
   // Register the directive (and any callbacks, eventually)
-  Alpine.directive( 'formdata', ( el ) => {
+  Alpine.directive( 'formdata', ( el, { modifiers, expression } ) => {
 
 		// x-debug (in the correct "scope") should allow me to show logs or not
 		true ? console.log( 'initializing formdata' ) : ""
 		//Alpine.directive( 'formdata', ( el, { expression }, { evaluateLater, effect } )
 		//Alpine.directive( 'formdata', ( el, { expression }, { evaluate } )
+
+/*
+console.log( modifiers );
+console.log( expression );
+
+console.log( modifiers.includes( "exhaustive" ) )
+return
+*/
+
+		// Check if the user wants to immediately throw an exception or evaluate ALL the fields
+		if ( el.hasAttribute( "x-exhaustive" ) ) {
+			config.catchall = true
+		}
 
 		// Check if the user wants to diplay a "popup" or not
 		if ( false ) {
@@ -206,117 +224,126 @@ document.addEventListener( "alpine:init", (xx) => {
 
 				// If it doesn't match, throw or just go with the default
 				if ( !config.popupstyle || positions.getIndex( config.popupstyle ) ) {
-					alert( `
+					die( `
 						Argument type to [x-position] must be one of the following: 
 						${[ "top", "left", "right", "bottom", "centered" ].join( "\n" )} 
-					` )
-					return
+					`)
 				}
 
 			}
 		}
 
-		// Check if the user wants to immediately throw an exception or evaluate ALL the fields
-		if ( el.hasAttribute( "x-all" ) ) {
-			config.catchall = true
-		}
-
 		// Get any custom class names
-		if ( el.hasAttribute( "x-onerrorclass" ) ) {
-			const regex = /[0-9]/
-			config.classname = el.getAttribute( "x-onerrorclass" ) 
-			// Perhaps make sure that the class name is valid? and not blank?
-			if ( !config.classname ) { //|| config.classname 
-				alert( `Argument type to [x-animtime] must be numeric and positive` )
-				return
-			}	
+		if ( !el.hasAttribute( "x-onerrorclass" ) ) {
+			config.classname = `_${random()}`
 		}
 		else {
-			// Generate a random one
-			config.classname = `_${random()}`
+			config.classname = el.getAttribute( "x-onerrorclass" ) 
+
+			// Make sure that the class name is valid? and not blank?
+			if ( !config.classname ) {
+				die( `Argument type to [x-onerrorclass] must be a string` )
+			}
+
+			// Make sure that the class name is valid (e.g. starts with anything but a number)	
+			if ( /[0-9]/.exec( config.classname ) ) {
+				die( `Argument type to [x-onerrorclass] must be a string and start with an English letter` )
+			}
+
+		}
+	
+		// If animate is true, add rules
+		if ( el.hasAttribute( "x-animate" ) || el.hasAttribute( "x-animtime" ) ) {
+			// Find the head (or root) node
+			const xel = ( [].slice.call( document.getElementsByTagName( "head" ) ) || [])[0] || document.body
 
 			// Check that all animation time is positive
 			if ( el.hasAttribute( "x-animtime" ) ) {
 				if ( isNaN( config.animtime = el.getAttribute( "x-animtime" ) ) ) {
-					alert( `Argument type to [x-animtime] must be numeric and positive` )
-					return
+					die( `Argument type to [x-animtime] must be numeric and positive` )
 				}
 			}
 
 			// Check that "stay" time is positive
 			if ( el.hasAttribute( "x-staytime" ) ) {
 				if ( isNaN( config.staytime = el.getAttribute( "x-staytime" ) ) ) {
-					alert( `Argument type to [x-animtime] must be numeric and positive` )
-					return
+					die( `Argument type to [x-animtime] must be numeric and positive` )
 				}	
 			}
 
 			// Add to the DOM before we even start
-			const style = `
-				@keyframes setborder { 
-					from { border: 1px solid #444; } 
-					to { border: 5px solid red; } 
-				}
-
-				@keyframes noborder { 
-					from { border: 5px solid red; } 
-					to { border: 1px solid #444; } 
-				}
-
-				@keyframes setbg { 
-					from { background: transparent; color: transparent; } 
-					to { background: red; color: white; }
-				}
-
-				@keyframes nobg { 
-					from { background: red; color: white; } 
-					to { background: transparent; color: transparent; }
-				}
-
-				@keyframes shaker {
-					0% { transform: translate(3px,0px); }
-					10% { transform: translate(0px,3px); }
-					20% { transform: translate(2px,0px); }
-					30% { transform: translate(0px,2px); }
-					40% { transform: translate(1px,0px); }
-					50% { transform: translate(0px,1px); }
-					100% { transform: translate(0px,0px); }
-				}
-
-				input.${config.classname}, 
-				textarea.${config.classname}, 
-				select.${config.classname} { 
-					position: relative; 
-					animation-name: setborder, shaker, noborder;
-					animation-delay: 0s, 0s, 2s;
-					animation-duration: ${config.animtime}s, 0.25s, ${config.animtime}s;
-					animation-iteration-count: 1, 1, 1;
-					animation-fill-mode: forwards, none, forwards;
-				}
-
-				div.${config.classname} {
-					position: absolute; 
-					padding: 5px;
-					animation-name: setbg, shaker, nobg;
-					animation-delay: 0s, 0s, 2s;
-					animation-duration: ${config.animtime}s, 0.25s, ${config.animtime}s;
-					animation-iteration-count: 1, 1, 1;
-					animation-fill-mode: forwards, none, forwards;
-				}
-			`
-
-			// Add to the head first, or if not present, the end of the document
-			const xel = ( [].slice.call( document.getElementsByTagName( "head" ) ) || [])[0] || document.body
 			if ( xel ) {
 				const dom = document.createElement( "style" );
-				dom.innerHTML = style;
+				dom.innerHTML = `
+					@keyframes setborder { 
+						from { border: 1px solid #444; } 
+						to { border: 5px solid red; } 
+					}
+
+					@keyframes noborder { 
+						from { border: 5px solid red; } 
+						to { border: 1px solid #444; } 
+					}
+
+					@keyframes setbg { 
+						from { background: transparent; color: transparent; } 
+						to { background: red; color: white; }
+					}
+
+					@keyframes nobg { 
+						from { background: red; color: white; } 
+						to { background: transparent; color: transparent; }
+					}
+
+					@keyframes shaker {
+						0% { transform: translate(3px,0px); }
+						10% { transform: translate(0px,3px); }
+						20% { transform: translate(2px,0px); }
+						30% { transform: translate(0px,2px); }
+						40% { transform: translate(1px,0px); }
+						50% { transform: translate(0px,1px); }
+						100% { transform: translate(0px,0px); }
+					}
+
+					input.${config.classname}, 
+					textarea.${config.classname}, 
+					select.${config.classname} { 
+						position: relative; 
+						animation-name: setborder, shaker, noborder;
+						animation-delay: 0s, 0s, 2s;
+						animation-duration: ${config.animtime}s, 0.25s, ${config.animtime}s;
+						animation-iteration-count: 1, 1, 1;
+						animation-fill-mode: forwards, none, forwards;
+					}
+
+					div.${config.classname} {
+						position: absolute; 
+						padding: 5px;
+						animation-name: setbg, shaker, nobg;
+						animation-delay: 0s, 0s, 2s;
+						animation-duration: ${config.animtime}s, 0.25s, ${config.animtime}s;
+						animation-iteration-count: 1, 1, 1;
+						animation-fill-mode: forwards, none, forwards;
+					}`
+
 				xel.appendChild( dom )
 			}
 		}
 
-		//console.log( formdata )
+		// Dump the configuration if requested
+		if ( true ) {
     //Alpine.store( 'formdata' ).data = formdata
-		//console.log( `X-ALL = ${config.catchall}` )
+			console.log( "============= CONFIGURATION =================" ) 
+			console.log( `x-all = ${config.catchall}` )
+			console.log( `x-position = ${config.popupstyle}` )
+			console.log( `x-onerrorclass = ${config.classname}` )
+			console.log( `x-animtime = ${config.animtime}` )
+			console.log( `x-staytime = ${config.staytime}` )
+			console.log( `x-all = ${config.all}` )
+			//console.log( `x-extra = ${config.extra}` )
+			//console.log( `x-realtime = ${config.realtime}` )
+			console.log( "============= END CONFIGURATION ============" ) 
+		}
   })
 
 })
