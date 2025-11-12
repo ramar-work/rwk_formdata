@@ -44,7 +44,7 @@ Use x-formdata somewhere on a form element on your page.  This will "activate" t
 Below is a quick table of the possible decorators, their arguments and what they do.
 
 Decorator Name | Arguments | Description
-===            | ===       | ===
+---- | ---- | ----
 x-formdata     | -         | "Activates" a form.
 x-onerror      | 1 (string) | Specifies a custom error string to use when failures occur on a field.
 x-validator    | 0         |         
