@@ -24,31 +24,31 @@
  */
 document.addEventListener( "alpine:init", (xx) => {
 
-	// Define a list of selectors that won't change
-	const selectors = 'input:not([type=submit]), select, textarea'
-	
 	// Define a config object and reference won't change 
 	const config = {
 
-		// 
+		// Set total animation length
 		staytime: 3.25,
 
-		// 
+		// Set animation time 
 		animtime: 0.5,
 
-		//
+		// Choose to decorate or not
 		decoration: false,
 
-		//
+		// Choose exhaustive mode
 		exhaustive: false,
 
-		//
+		// Choose realtime mode
 		realtime: false,
 
 		// TODO: Try to change this to encapsulate
 		classname: "",  //`_${random()}`
 	}
 
+	// Define a list of selectors that won't change
+	const selectors = 'input:not([type=submit]), select, textarea'
+	
 	// Use this until we figure out the best way to display errors
 	const die = function (errmsg) {
 		throw new Error( errmsg )
@@ -149,39 +149,72 @@ document.addEventListener( "alpine:init", (xx) => {
 
 		// Check for a validator function
 		if ( f.hasAttribute( "x-formdata-validator" ) ) {
+
 			// Pull the validator
 			const validator = f.getAttribute( "x-formdata-validator" )
 			const regexp = new RegExp( validator )
-			//console.log( regexp.exec( c ) )
+
+			// Check that the validator works at all 
+			if ( false ) {
+				// ...
+			}
+
+			// Finally, check it
 			if ( !regexp.exec( c ) ) {
-				styleError( f, errstr || `Field ${f.name} fails validation` )
+				const lerr = f.getAttribute( "x-formdata-onvalidatorerror" )
+				styleError( f, lerr || errstr || `Field ${f.name} fails validation` )
 				return false 
 			}
 		}
 
-		// If the 'x-formdata-transformer' attribute exists, run that on the value
-		// This can control custom stuff like email addresses and phone formatters
-		if ( f.hasAttribute( "x-formdata-transformer" ) ) {
-			die( "Attribute x-formdata-transformer is not fully implemented yet." )
-			return false 
-		}
+		// This is used to change the value underneath for formatting purposes	
+		if ( f.hasAttribute( "x-formdata-formatter" ) ) {
 		
+			// Extract the function or call	
+			const fbody = f.getAttribute( "x-formdata-formatter" )
+			if ( !fbody ) {
+				die( "Expected argument for attribute x-formdata-formatter." )
+				return false 
+			}
+
+			// Prevent silliness
+			if ( f.type == "checkbox" && f.type == "select-multiple" ) {
+				die( `x-formdata-formatter attribute should not be used on element type: ${f.type}` )
+				return false 
+			}
+
+			// NOTE: It would be worth the time to develop some tests comparing Function vs indirect eval
+			// NOTE: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval
+			f.value = (eval?.(`"use strict";({f:${fbody}})`)).f( c )
+		}
+	
 		// Finally, serialize each type for transmission via JSON 
-		// TODO: (supporting other formats would still help)
 		if ( f.type == "checkbox" ) {
 			p[ f.name ] = ( f.checked ) ? true : false
 		}
-
-		// Handle select multiples
 		else if ( f.type == "select-multiple" ) { 
 			//console.log(f), console.log( `Value = ${f.value}` )
 			p[ f.name ] = []
-			for ( const ff of f.selectedOptions ) p[ f.name ].push( ff.value )	
+			for ( const ff of f.selectedOptions ) {
+				p[ f.name ].push( ff.value )	
+			}
 		}
-
-		// Everything else...
 		else {
-			p[ f.name ] = c
+
+			// NOTE: Custom transformers only are run here
+			if ( !f.hasAttribute( "x-formdata-transformer" ) )
+				p[ f.name ] = c
+			else {
+				const fbody = f.getAttribute( "x-formdata-transformer" )
+
+				if ( !fbody ) {
+					die( "Expected argument for attribute x-formdata-transformer." )
+					return false 
+				}
+
+				p[ f.name ] = (eval?.(`"use strict";({f:${fbody}})`)).f( c )
+			}
+
 		}
 
 		return true
@@ -194,18 +227,18 @@ document.addEventListener( "alpine:init", (xx) => {
   Alpine.magic( 'formdata', (el) => {
 
 		// Define ahead of time for cleanliness
-    const p = {}
-    const formdata = el.querySelectorAll( selectors )
+		let p = {}
 		let pstatus = true;
 
     // Validate and require checks
-    for ( const f of formdata ) {
+    for ( const f of el.querySelectorAll( selectors ) ) {
 		
 			// If exhaustive, then all checks must run
 			if ( !validate( p, f ) ) {
-				pstatus = false 
+				pstatus = false
 			}
 
+			// If a failure is caught, quit
 			if ( !pstatus && !config.exhaustive ) {
 				return null
 			}
@@ -365,18 +398,28 @@ document.addEventListener( "alpine:init", (xx) => {
 			}
 		}
 
+		// Add a listener
+		if ( modifiers.includes( "realtime" ) ) {
+			config.realtime = true
+			// Find each element in the selector list and apply a listener
+			for ( const f of el.querySelectorAll( selectors ) ) {
+				f.addEventListener( "change", () => {
+					validate( {}, f )
+				})
+			}
+		}
+
 		// Dump the configuration if requested
 		if ( modifiers.includes( "debug" ) ) {
 			//Alpine.store( 'formdata' ).data = formdata
 			console.log( "============= CONFIGURATION =================" ) 
-			console.log( `x-exhaustive = ${config.exhaustive}` )
-			console.log( `x-decoration = ${config.decoration}` )
+			console.log( `x-exhaustive   = ${config.exhaustive}` )
+			console.log( `x-decoration   = ${config.decoration}` )
 			console.log( `x-onerrorclass = ${config.classname}` )
-			console.log( `x-animtime = ${config.animtime}` )
-			console.log( `x-staytime = ${config.staytime}` )
-			console.log( `x-all = ${config.all}` )
+			console.log( `x-animtime     = ${config.animtime}` )
+			console.log( `x-staytime     = ${config.staytime}` )
+			console.log( `x-realtime     = ${config.realtime}` )
 			//console.log( `x-extra = ${config.extra}` )
-			//console.log( `x-realtime = ${config.realtime}` )
 			console.log( "============= END CONFIGURATION ============" ) 
 		}
   })

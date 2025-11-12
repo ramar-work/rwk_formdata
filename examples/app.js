@@ -14,6 +14,8 @@ document.addEventListener( "alpine:init", () => {
 
 		showComments: false,
 
+		showMediaUpload: false,
+
 		submit( f ) {
 			//console.log('submitting')
 			if ( f ) {

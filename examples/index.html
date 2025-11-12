@@ -28,6 +28,9 @@ document.addEventListener( "alpine:init", () => {
 		// Toggle comments textarea
 		showComments: false,
 
+		// Toggle media upload area
+		showMediaUpload: false,
+
 		// Handle a submit through a custom callback
 		submit( f ) {
 			if ( f ) {
@@ -53,6 +56,8 @@ input.pinky {
 	background: blue;
 }
 </style>
+
+		x-formdata-onerrorclass="pinky"
 -->
 
 
@@ -60,9 +65,7 @@ input.pinky {
 
 <div x-data="app" class="back">
 
-	<form x-formdata.animate.debug.decorate
-		x-formdata-onerrorclass="pinky"
-		@submit.prevent="submit( $formdata )">
+	<form x-formdata.animate.debug.decorate.realtime @submit.prevent="submit( $formdata )">
 
 		<h1>Contact Us</h1>
 
@@ -79,18 +82,18 @@ input.pinky {
 
 		<div>
 			<label>Phone Number*</label>
-			<input name="number" minlength=3 x-validator="^abc$">
+			<input name="number" minlength=3 x-formdata-validator="^abc$" placeholder="000-000-0000">
 		</div>
 
 		<div>
 			<label>Email Address*</label>
-			<input name="email" minlength=4 x-validator="email" x-onvalidatorerror="This doesn't look like a valid email address">
+			<input name="email" minlength=4 x-formdata-onvalidatorerror="This doesn't look like a valid email address">
 		</div>
 
 		<div class="half">
 			<div>
 				<label>City</label>
-				<input name="city">
+				<input name="city" x-formdata-formatter="(x) => x.toUpperCase()" x-formdata-transformer="(x) => x.toLowerCase()">
 			</div>
 			<div style="display: flex; gap: 8%;">
 				<div style="width: 50%">
@@ -183,6 +186,17 @@ input.pinky {
 			</div>
 			<textarea x-transition x-show="showComments" name="comments"></textarea>
 		</div>
+
+		<!--
+		<div>
+			<div class="showhide">
+				<label>Upload Media</label>
+				<div @click="showMediaUpload = !showMediaUpload"
+					:class="showMediaUpload ? 'toggled' : 'toggle'">&darr;</div>
+			</div>
+			<input x-transition x-show="showMediaUpload" type="file" name="file">
+		</div>
+		-->
 
 		<div>	
 			<input type="submit" value="Submit" style="width:50%; min-width: 100px; max-width: 200px;">
