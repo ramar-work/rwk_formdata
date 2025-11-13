@@ -92,6 +92,8 @@ footer {
 	text-align: center;
 	font-size: 0.6em;
 	line-height: 1.1em;
+	color: #bbb;
+	font-weight: bold;
 }
 
 div.flex-split {
@@ -233,13 +235,12 @@ body {
 		max-width: 600px;
 		min-width: 250px;
 		width: 70%;
-		margin: 15%;
 		background: rgba(255,255,255,0.9);
+		margin: 0 auto !important;	
 	}
 
 	div.flex-split {
-		display: block;
-		margin-top: -10%;
+		margin: 0 auto !important;	
 	}
 
 	div.flex-split > div {
