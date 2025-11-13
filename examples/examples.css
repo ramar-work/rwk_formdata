@@ -56,18 +56,85 @@ html {
 	color: #444;
 	font-style: normal;
 	font-weight: 300;
+	height: 100%;	
+}
+
+header {
+	background: black;
+	height: 50px;
+	position: relative;
+	width: 100%;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+header div:nth-child(1) {
+	width: 95%;
+	min-width: 100px;
+	max-width: 200px;
+	height: 100%;
+	background-image: url( "../assets/logow-text.avif" );
+	background-size: 70%;
+	background-position:left; 
+	background-repeat: no-repeat;
+	margin-left: 5%;
+}
+
+footer {
+	position: relative;
+	background: black;
+	height: 50px;
+	width: 100%;
+	padding: 7.5px;
+	box-sizing: border-box;
+	text-align: center;
+	font-size: 0.6em;
+	line-height: 1.1em;
+}
+
+div.flex-split {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-around;
+	gap: 10px;
+}
+
+div.flex-split > div {
+	margin-left: 5%;
+	font-weight: 700;
+	font-size: 4em;
+	letter-spacing: -1px;
+	color: white;
+	text-shadow: 5px 5px 5px #000;
+	width: 45%;
+}
+
+.wrapper {
+	display: flex;
+	flex-direction: column;
+	min-height: 100%;
+	justify-content: space-between;
+	/*
+	align-items: center;
+	*/
 }
 
 form {
 	border: #ddd solid 1px;
 	box-shadow: 4px 4px 20px #444;
-	width: 50%;
+	min-width: 300px;
+	width: 45%;
 	height: 80%;
-	margin: 5%;
+	margin-right: 5%;
 	background: white;
 	border-radius: 5px;
 	padding: 20px;
 	position: relative;
+	margin-top: 20px;
+	margin-bottom: 20px;
 }
 
 form h1 {
@@ -119,8 +186,13 @@ label,input {
 }
 
 body {
-	background-image: url("../assets/z1.avif");
-	background-size: 120%;
+	height: 100%;
+	background-color: black;
+	background-image: url("../assets/nsx.avif");
+	background-size: 1600px 1067px;
+	background-position: center;
+	background-attachment: fixed;
+	background-repeat: no-repeat;
 }
 
 
@@ -146,14 +218,37 @@ body {
 	justify-content:space-between;
 }
 
-@media screen and (max-width: 666px) {
+@media screen and (max-width: 777px) {
+
+	body {
+		background-image: url( "../assets/supra-1400x1700.avif" );
+		background-position: center;
+		background-attachment: fixed;
+		background-repeat: no-repeat;
+		background-size: 1000px 1300px;
+	}
 
 	form {
 		box-sizing: border-box;
 		max-width: 600px;
 		min-width: 250px;
-		width: 80%;
-		margin: 10%;
+		width: 70%;
+		margin: 15%;
+		background: rgba(255,255,255,0.9);
+	}
+
+	div.flex-split {
+		display: block;
+		margin-top: -10%;
+	}
+
+	div.flex-split > div {
+		display: none;
+	}
+
+	header div:nth-child(1) {
+		margin: 0 auto;
+		background-position: center; 
 	}
 
 }

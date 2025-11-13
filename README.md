@@ -50,5 +50,7 @@ x-onerror      | 1 (string) | Specifies a custom error string to use when failur
 x-validator    | 0         |         
 
 
-
 ## Contact & Support
+
+Message me or just send me an email at: [ramar@ramarcollins.com](mailto:ramar@ramarcollins.com)
+
