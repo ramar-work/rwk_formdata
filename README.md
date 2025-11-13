@@ -2,6 +2,11 @@
 
 A form validation and serialization module for front-end apps.
 
+<!--
+<video width=400 controls loop><source src="./assets/entry.mp4" /></video>
+-->
+
+![Demonstration](./assets/entry.gif)
 
 ## What this is
 
