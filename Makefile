@@ -5,5 +5,5 @@ minify:
 
 
 # Convert from markdown into HTML for quick testing
-docstest:
+docs:
 	markdown README.md > readme.html
