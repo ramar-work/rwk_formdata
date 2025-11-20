@@ -1,6 +1,6 @@
 /**
- * formdata.js
- * ===========
+ * rwk-formdata.js
+ * ===============
  * 
  * Collects form handling logic all in one place.  In any apps, this
  * can be rebuilt with `form`.
@@ -46,13 +46,16 @@ document.addEventListener( "alpine:init", (xx) => {
 		classname: "",  //`_${random()}`
 	}
 
+
 	// Define a list of selectors that won't change
 	const selectors = 'input:not([type=submit]), select, textarea'
+
 	
 	// Use this until we figure out the best way to display errors
 	const die = function (errmsg) {
 		throw new Error( errmsg )
 	} 
+
 
 	// Generate a random string
 	const random = function () {
@@ -63,6 +66,7 @@ document.addEventListener( "alpine:init", (xx) => {
 		}  
 		return arr.join("")
 	}
+
 
 	// Error decorator, TODO: I should be private
 	const styleError = function ( el, errstr ) {
@@ -95,6 +99,7 @@ document.addEventListener( "alpine:init", (xx) => {
 		return
 	}
 
+
 	// Define a local validator function for each field
 	const validate = function (p,f) {
 
@@ -121,7 +126,7 @@ document.addEventListener( "alpine:init", (xx) => {
 			return false 
 		}
 
-		// Check for a minimum length
+		// Check for a {min,max}imum length
 		if ( f.hasAttribute( "minlength" ) ) {
 			const len = parseInt( f.getAttribute( "minlength" ) )
 			if ( isNaN( len ) ) {
@@ -192,6 +197,7 @@ document.addEventListener( "alpine:init", (xx) => {
 		if ( f.type == "checkbox" ) {
 			p[ f.name ] = ( f.checked ) ? true : false
 		}
+
 		else if ( f.type == "select-multiple" ) { 
 			//console.log(f), console.log( `Value = ${f.value}` )
 			p[ f.name ] = []
@@ -199,6 +205,34 @@ document.addEventListener( "alpine:init", (xx) => {
 				p[ f.name ].push( ff.value )	
 			}
 		}
+
+		else if ( f.type == "file" ) {
+
+			// There may be multiple files
+			p[ f.name ] = []
+
+			// Loop through each file
+			for ( const ff of f.files ) {
+
+				// Create a Blob 
+				const b = new Blob( [ff], { type: ff.type } )
+				console.log(b)
+
+				// Convert to base64: https://javascript.info/blob
+				const r = new FileReader()
+				const b64 = r.readAsDataURL( b )
+				r.onload = function () { 
+					p[ f.name ] = r.result
+					console.log( p[ f.name ] )
+				}
+				
+				// Object URL testing	
+				//const xf = URL.createObjectURL(b)
+				//const id = document.getElementById( "xj" );id.src = xf
+			}
+
+		}
+
 		else {
 
 			// NOTE: Custom transformers only are run here
@@ -221,14 +255,15 @@ document.addEventListener( "alpine:init", (xx) => {
 	}	
 
   // Use this to shuttle stuff around...
-  Alpine.store( 'formdata', { data: {} } )
+  Alpine.store( 'formdata', { 
+		data: {} 
+	})
 
   // Use the magic to access the validated values 
   Alpine.magic( 'formdata', (el) => {
 
 		// Define ahead of time for cleanliness
-		let p = {}
-		let pstatus = true;
+		let p = {}, pstatus = true;
 
     // Validate and require checks
     for ( const f of el.querySelectorAll( selectors ) ) {
@@ -401,6 +436,7 @@ document.addEventListener( "alpine:init", (xx) => {
 		// Add a listener
 		if ( modifiers.includes( "realtime" ) ) {
 			config.realtime = true
+			console.log( el.querySelectorAll( selectors ) )
 			// Find each element in the selector list and apply a listener
 			for ( const f of el.querySelectorAll( selectors ) ) {
 				f.addEventListener( "change", () => {
