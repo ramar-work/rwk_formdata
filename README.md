@@ -1,12 +1,13 @@
-# RWK Formdata
+# rwk-formdata
 
 A form validation and serialization module for front-end apps.
 
-<!--
-<video width=400 controls loop><source src="./assets/entry.mp4" /></video>
--->
+<center>
+<img alt="Demonstration" src="./assets/entry.gif"></img>
+</center>
 
-![Demonstration](./assets/entry.gif)
+<!-- ![Demonstration](./assets/entry.gif) -->
+
 
 ## What this is
 
@@ -51,6 +52,16 @@ This module works VERY hard to stay simple and stay out of your way when coding.
 
 ### With Alpine
 
+### Submittal & Validation
+
+When submit is pressed, this library takes the entered data, validates it according your HTML markup and any additional rules, and creates a JSON object containing the contents of your data.   
+
+If validation should fail, two things will happen: 
+
+1. Depending on the exception type, form fields failing validation will indicate themselves via a visual cue and an optional message (which can be customized with `x-formdata-onerror` or `x-formdata-onvalidationerror`)
+2. a custom event (onformfailure) will be generated.  Should you want something more complex to happen on validation failure, add an event listener targeting this property. 
+
+
 Use `x-formdata` on the appropriate &lt;form&gt; element within your HTML.  This will "activate" the module and make Alpine aware of elements that should be inspected when the submit button is pressed.
 
 To submit the data from the form, simply reference `$formdata` within the `@submit.prevent` directive placed on the &lt;form&gt; element.  Example:
@@ -60,6 +71,7 @@ To submit the data from the form, simply reference `$formdata` within the `@subm
 ...
 &lt;/form&gt;
 </pre>
+
 
 #### Modifiers
 
@@ -73,7 +85,6 @@ Modifier Name | Description
 [realtime](#realtime) |  Runs validation on fields as the user progresses through the form
 [debug](#debug) |  Run in debug mode
 
-<!--
 ##### More
 
 <a id="animate"></a>
@@ -104,7 +115,6 @@ Modifier Name | Description
 ###### debug
 
 <p> Run in debug mode</p>
--->
 
 
 
@@ -123,7 +133,6 @@ Attribute Name          | Arguments  | Description
 [x-formdata-onvalidatorerror](#x-formdata-onvalidatorerror) |  1 (string) |  Specifies a custom error message to use when failures occur on a field.
 
 
-<!--
 ##### More
 
 Additional details about each of the attributes are below:
@@ -156,18 +165,15 @@ Additional details about each of the attributes are below:
 ###### x-formdata-onvalidatorerror
 
 <p> Specifies a custom error message to use when failures occur on a field.</p>
--->
 
 
-<!--
 ## Examples
 
-### A Simple Login Screen with a Maskable Password
+A few examples of `x-formdata` in action are listed below.  Additional examples can be found in the `examples/html/` directory of this repostiory.
 
 ### A Contact Form Requesting a Phone Number
 
 ### A Headshot Upload Form
--->
 
 ## Contact & Support
 

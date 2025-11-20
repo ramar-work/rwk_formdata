@@ -13,7 +13,7 @@
 	<title>Formdata Test</title>
 	<link rel="stylesheet" href="examples.css">
 	<script defer src="../vendor/alpine.min.js"></script>
-	<script src="../src/formdata.js"></script>
+	<script src="../src/rwk-formdata.js"></script>
 </head>
 
 
@@ -73,10 +73,10 @@ input.pinky {
 <div class="flex-split" x-data="app"> 
 
 	<div class="left">
-	<h1 class="float">Charlotte's #1 Source for JDM Autos and Parts</h1>
+		<h1 class="float">Charlotte's #1 Source for JDM Autos and Parts</h1>
 	</div>
 
-	<form x-formdata.animate.debug.decorate.realtime @submit.prevent="submit( $formdata )">
+	<form x-formdata.animate.debug.decorate.realtime @submit.prevent="submit( await $formdata )">
 
 		<h1>Contact Us</h1>
 
@@ -198,7 +198,6 @@ input.pinky {
 			<textarea x-transition x-show="showComments" name="comments"></textarea>
 		</div>
 
-		<!--
 		<div>
 			<div class="showhide">
 				<label>Upload Media</label>
@@ -207,7 +206,6 @@ input.pinky {
 			</div>
 			<input x-transition x-show="showMediaUpload" type="file" name="file">
 		</div>
-		-->
 
 		<div>	
 			<input type="submit" value="Submit" style="width:50%; min-width: 100px; max-width: 200px;">

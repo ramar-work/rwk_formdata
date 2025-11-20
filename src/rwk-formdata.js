@@ -2,24 +2,8 @@
  * rwk-formdata.js
  * ===============
  * 
- * Collects form handling logic all in one place.  In any apps, this
- * can be rebuilt with `form`.
- *
- *
- * Usage
- * -----
- * - ?
- * - ?
- * - ?
- *
- *
- * TODO
- * ----
- * - Add a term for auto submittal (if values pass validation)
- * - x-sendas to control how to send the payload back to server
- * - x-sendmethod to control how to send the payload back to server
- * - Add basic error handling (can't tell if this should be seprate or not)
- * - x-error or x-onerror can be used to create custom messages.
+ * Collects form handling logic all in one place.
+ * Please see README.md for usage and setup instructions.
  *
  */
 document.addEventListener( "alpine:init", (xx) => {
@@ -101,7 +85,7 @@ document.addEventListener( "alpine:init", (xx) => {
 
 
 	// Define a local validator function for each field
-	const validate = function (p,f) {
+	const validate = async function (p,f) {
 
 		// Define things
 		const c = f.value.trim()
@@ -159,11 +143,6 @@ document.addEventListener( "alpine:init", (xx) => {
 			const validator = f.getAttribute( "x-formdata-validator" )
 			const regexp = new RegExp( validator )
 
-			// Check that the validator works at all 
-			if ( false ) {
-				// ...
-			}
-
 			// Finally, check it
 			if ( !regexp.exec( c ) ) {
 				const lerr = f.getAttribute( "x-formdata-onvalidatorerror" )
@@ -214,21 +193,16 @@ document.addEventListener( "alpine:init", (xx) => {
 			// Loop through each file
 			for ( const ff of f.files ) {
 
-				// Create a Blob 
-				const b = new Blob( [ff], { type: ff.type } )
-				console.log(b)
-
-				// Convert to base64: https://javascript.info/blob
-				const r = new FileReader()
-				const b64 = r.readAsDataURL( b )
-				r.onload = function () { 
-					p[ f.name ] = r.result
-					console.log( p[ f.name ] )
-				}
+				// Use FileReader to convert to base64 and return
+				const file = new FileReader()
+				file.readAsDataURL( ff )
+				return new Promise( (resolve,reject) => {
+					file.onload = () => {
+						p[ f.name ].push( file.result.replace( /data:[a-z]*\/[\w-]*;base64,/, "" ) )
+						resolve( true )
+					}
+				})
 				
-				// Object URL testing	
-				//const xf = URL.createObjectURL(b)
-				//const id = document.getElementById( "xj" );id.src = xf
 			}
 
 		}
@@ -260,7 +234,7 @@ document.addEventListener( "alpine:init", (xx) => {
 	})
 
   // Use the magic to access the validated values 
-  Alpine.magic( 'formdata', (el) => {
+  Alpine.magic( 'formdata', async (el) => {
 
 		// Define ahead of time for cleanliness
 		let p = {}, pstatus = true;
@@ -269,7 +243,7 @@ document.addEventListener( "alpine:init", (xx) => {
     for ( const f of el.querySelectorAll( selectors ) ) {
 		
 			// If exhaustive, then all checks must run
-			if ( !validate( p, f ) ) {
+			if ( !await validate( p, f ) ) {
 				pstatus = false
 			}
 
