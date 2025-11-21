@@ -26,6 +26,12 @@ document.addEventListener( "alpine:init", (xx) => {
 		// Choose realtime mode
 		realtime: false,
 
+		// Enable or disable scrolling
+		scroll: true,
+
+		// Enable important CSS rules in specific cases
+		important: "",
+
 		// TODO: Try to change this to encapsulate
 		classname: "",  //`_${random()}`
 	}
@@ -60,6 +66,7 @@ document.addEventListener( "alpine:init", (xx) => {
 		// Add style to thing
 		el.classList.add( config.classname )
 
+		// Add further decoration
 		if ( config.decoration ) {
 			// Add a div for TEXT as well (with a matching color or class)
 			if ( errstr ) {
@@ -68,6 +75,13 @@ document.addEventListener( "alpine:init", (xx) => {
 				div.innerHTML = errstr
 				el.insertAdjacentElement( "afterend", div )
 			}
+		}
+
+		// Scroll if alternate behavior is not specified
+		if ( config.scroll ) {
+			// Add add'l offset
+			const i = el.offsetTop
+			window.scrollTo({"top":i,"left":0,"behavior":"smooth"})
 		}
 	
 		// Remove the class after time elapses
@@ -285,6 +299,16 @@ document.addEventListener( "alpine:init", (xx) => {
 			config.exhaustive = true
 		}
 
+		// Disable scrolling
+		if ( modifiers.includes( "noscroll" ) ) {
+			config.scroll = false
+		}
+
+		// Try important
+		if ( modifiers.includes( "important" ) ) {
+			config.important = "!important"
+		}
+
 		// Check if the user wants to diplay a "popup" or not
 		if ( modifiers.includes( "decorate" ) ) {
 		
@@ -354,7 +378,7 @@ document.addEventListener( "alpine:init", (xx) => {
 				dom.innerHTML = `
 					@keyframes setborder { 
 						from { border: 1px solid #444; } 
-						to { border: 5px solid red; } 
+						to { border: 5px solid red ${config.important}; }
 					}
 
 					@keyframes noborder { 
@@ -391,6 +415,7 @@ document.addEventListener( "alpine:init", (xx) => {
 						animation-duration: ${config.animtime}s, 0.25s, ${config.animtime}s;
 						animation-iteration-count: 1, 1, 1;
 						animation-fill-mode: forwards, none, forwards;
+						border: 5px solid red ${config.important};
 					}
 
 					div.${config.classname} {
@@ -423,13 +448,13 @@ document.addEventListener( "alpine:init", (xx) => {
 		if ( modifiers.includes( "debug" ) ) {
 			//Alpine.store( 'formdata' ).data = formdata
 			console.log( "============= CONFIGURATION =================" ) 
-			console.log( `x-exhaustive   = ${config.exhaustive}` )
-			console.log( `x-decoration   = ${config.decoration}` )
-			console.log( `x-onerrorclass = ${config.classname}` )
-			console.log( `x-animtime     = ${config.animtime}` )
-			console.log( `x-staytime     = ${config.staytime}` )
-			console.log( `x-realtime     = ${config.realtime}` )
-			//console.log( `x-extra = ${config.extra}` )
+			console.log( `.exhaustive   = ${config.exhaustive}` )
+			console.log( `.decoration   = ${config.decoration}` )
+			console.log( `.onerrorclass = ${config.classname}` )
+			console.log( `.animtime     = ${config.animtime}` )
+			console.log( `.staytime     = ${config.staytime}` )
+			console.log( `.realtime     = ${config.realtime}` )
+			//console.log( `.extra = ${config.extra}` )
 			console.log( "============= END CONFIGURATION ============" ) 
 		}
   })

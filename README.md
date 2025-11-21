@@ -32,6 +32,11 @@ So far, `rwk_formdata` works with the following frameworks/libraries:
 -->
 
 
+## Changelog
+
+- 11/21/25 - Added 'noscroll' modifier to disable scroll on validation failures.  Also added 'important' modifier to add `!important` rule to CSS borders. 
+
+
 ## Setup
 
 TBD
